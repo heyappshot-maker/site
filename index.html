@@ -40,7 +40,7 @@
   --ease:cubic-bezier(.2,.7,.2,1);
 }
 *{box-sizing:border-box}
-html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;font-size:18px}
 body{
   margin:0;background:var(--ink);color:var(--paper);
   font-family:'Instrument Sans','Helvetica Neue',Arial,sans-serif;
@@ -87,7 +87,9 @@ nav a:hover,nav a:focus-visible{color:var(--paper)}
 :focus-visible{outline:2px solid var(--cyan);outline-offset:3px;border-radius:4px}
 
 /* ---------- hero ---------- */
-.hero{padding:calc(68px + clamp(16px,2.6vw,34px)) 0 0;position:relative;overflow:hidden}
+.hero{padding:calc(68px + clamp(16px,2.6vw,34px)) 0 0;position:relative;overflow:hidden;display:flex;flex-direction:column}
+.hero .shell.load{order:1}
+.hero .stage{order:2;margin-top:clamp(30px,4.6vw,50px)}
 .glow{position:absolute;top:-28%;left:50%;width:min(1100px,120vw);aspect-ratio:1/.62;translate:-50% 0;
   background:radial-gradient(48% 52% at 30% 45%,rgba(139,92,246,.30),transparent 70%),
              radial-gradient(44% 48% at 68% 38%,rgba(255,45,143,.22),transparent 70%),
@@ -100,8 +102,11 @@ nav a:hover,nav a:focus-visible{color:var(--paper)}
 h1 .grad{background:var(--spectrum);-webkit-background-clip:text;background-clip:text;color:transparent}
 .hero-sub{margin-top:26px;max-width:52ch;font-size:clamp(1.02rem,1.55vw,1.2rem);color:var(--dim)}
 .hero-cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:34px}
-.hero-facts{display:flex;flex-wrap:wrap;gap:clamp(24px,5vw,56px);margin-top:44px;padding-top:26px;border-top:1px solid var(--line)}
-.fact b{display:block;font-family:'Archivo';font-weight:800;font-size:1.6rem;letter-spacing:-.03em}
+.hero-facts{display:flex;flex-wrap:wrap;gap:clamp(12px,2vw,16px);margin-top:44px}
+.fact{flex:1 1 clamp(130px,30%,200px);background:var(--panel);border:1px solid var(--line);border-radius:16px;
+  padding:18px 20px;transition:transform .3s var(--ease),border-color .3s,background .3s}
+.fact:hover{transform:translateY(-4px);border-color:var(--line-2);background:var(--panel-hi)}
+.fact b{display:block;font-family:'Archivo';font-weight:800;font-size:1.7rem;letter-spacing:-.03em}
 .fact span{font-size:.9rem;color:var(--dimmer)}
 
 /* ---------- hero showcase ---------- */
@@ -115,11 +120,14 @@ h1 .grad{background:var(--spectrum);-webkit-background-clip:text;background-clip
   background:var(--spectrum);transform:scaleX(0);transform-origin:0 50%;animation:tabfill 5200ms linear forwards}
 .stage:hover .tabs button.on::after{animation-play-state:paused}
 @keyframes tabfill{to{transform:scaleX(1)}}
-.slides{position:relative;height:clamp(210px,40vh,480px)}
-.slide{position:absolute;inset:0;margin:0;opacity:0;transform:scale(.94) translateY(24px);filter:blur(8px);
-  transition:opacity .8s var(--ease),transform 1s var(--ease),filter .8s var(--ease);pointer-events:none}
-.slide.on{opacity:1;transform:none;filter:none;pointer-events:auto;cursor:zoom-in}
+.slides{display:flex;gap:clamp(14px,2vw,22px);height:clamp(230px,38vh,400px)}
+.slide{position:relative;flex:1 1 0;margin:0;opacity:1;pointer-events:auto;cursor:zoom-in;
+  animation:slidefloat 5s ease-in-out infinite}
+.slide:nth-child(2){animation-delay:.25s}
+.slide:nth-child(3){animation-delay:.5s}
 .slide img{width:100%;height:100%;object-fit:contain}
+@keyframes slidefloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@media(prefers-reduced-motion:reduce){.slide{animation:none}}
 .stage-hint{text-align:center;margin-top:12px;font-size:.85rem;color:var(--dimmer)}
 @media(prefers-reduced-motion:reduce){.tabs button.on::after{transform:scaleX(1);animation:none}}
 
@@ -130,8 +138,19 @@ h1 .grad{background:var(--spectrum);-webkit-background-clip:text;background-clip
   padding:8px 16px;border-radius:999px;cursor:pointer;transition:.2s}
 .chip:hover{color:var(--paper);border-color:var(--line-2)}
 .chip[aria-pressed="true"]{background:var(--paper);color:#000;border-color:var(--paper)}
-.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:clamp(18px,2.6vw,30px);margin-top:34px}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px;text-align:left;
+.carousel{position:relative}
+.grid{display:flex;gap:clamp(16px,2vw,24px);margin-top:34px;overflow-x:auto;scroll-snap-type:x proximity;
+  scroll-padding-left:2px;padding:2px 2px 10px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.grid::-webkit-scrollbar{display:none}
+.car-nav{position:absolute;top:calc(50% - 20px);translate:0 -50%;width:44px;height:44px;border-radius:50%;
+  border:1px solid var(--line-2);background:rgba(10,10,12,.75);backdrop-filter:blur(10px);color:var(--paper);
+  font-size:1.2rem;display:grid;place-items:center;cursor:pointer;transition:background .2s;z-index:5}
+.car-nav:hover{background:rgba(255,255,255,.16)}
+.car-nav.prev{left:-14px}
+.car-nav.next{right:-14px}
+@media(max-width:760px){.car-nav{display:none}}
+.card{flex:0 0 calc((100% - 2*clamp(16px,2vw,24px))/3);scroll-snap-align:start;
+  background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px;text-align:left;
   font:inherit;color:inherit;cursor:zoom-in;transition:border-color .25s,background .25s,transform .25s var(--ease)}
 .card:hover{border-color:var(--line-2);background:var(--panel-hi)}
 .card:hover img{transform:scale(1.015)}
@@ -171,8 +190,12 @@ h1 .grad{background:var(--spectrum);-webkit-background-clip:text;background-clip
 
 /* ---------- pricing ---------- */
 .plans{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(16px,2.2vw,24px);align-items:start}
-.plan{border:1px solid var(--line);border-radius:22px;padding:clamp(24px,3vw,34px);background:var(--panel);position:relative;display:flex;flex-direction:column;min-height:100%}
-.plan.feature{background:linear-gradient(180deg,rgba(255,255,255,.085),rgba(255,255,255,.03));border-color:var(--line-2)}
+.plan{border:1px solid var(--line);border-radius:22px;padding:clamp(24px,3vw,34px);background:var(--panel);position:relative;display:flex;flex-direction:column;min-height:100%;
+  transition:transform .3s var(--ease),border-color .3s,background .3s,box-shadow .3s var(--ease)}
+.plan:hover{transform:translateY(-6px);border-color:var(--line-2)}
+.plan.feature{background:linear-gradient(180deg,rgba(255,255,255,.085),rgba(255,255,255,.03));border-color:var(--line-2);
+  box-shadow:0 20px 60px -20px rgba(139,92,246,.35)}
+@media(min-width:941px){.plan.feature{transform:scale(1.045)}.plan.feature:hover{transform:scale(1.045) translateY(-6px)}}
 .plan.feature::before{content:"";position:absolute;inset:-1px;border-radius:23px;padding:1px;background:var(--spectrum);
   -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
 .badge{position:absolute;top:-11px;left:clamp(24px,3vw,34px);font-family:'Archivo';font-weight:700;font-size:.72rem;
@@ -251,7 +274,7 @@ h2.big{font-size:clamp(2.5rem,6.2vw,4.4rem)}
 .reach-card .muted{font-size:.88rem}
 .reach-card:hover{transform:translateY(-2px);border-color:var(--line-2);background:var(--panel-hi)}
 .reach-card.done{border-color:rgba(123,232,107,.55)}
-.foot-links{display:flex;gap:20px}
+.foot-links{display:flex;flex-wrap:wrap;gap:10px 20px}
 .foot-links a{text-decoration:none}
 .foot-links a:hover{color:var(--paper)}
 
@@ -294,17 +317,19 @@ footer{border-top:1px solid var(--line);padding:42px 0 54px;margin-top:20px}
 @keyframes up{to{opacity:1;transform:none}}
 
 @media(max-width:760px){
-  .slides{height:min(56vh,440px)}
+  .slides{height:min(60vh,500px);overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding-left:2px;
+    scrollbar-width:none;padding-bottom:2px}
+  .slides::-webkit-scrollbar{display:none}
+  .slide{flex:0 0 88%;scroll-snap-align:center;animation:none}
   .tabs{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;justify-content:flex-start;padding-inline:2px}
   .tabs::-webkit-scrollbar{display:none}
   .tabs button{font-size:.83rem;padding:8px 12px 10px;flex:none}
   .tabs button.on::after{left:11px;right:11px}
-  .slide{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none}
-  .slide::-webkit-scrollbar{display:none}
-  .slide img{height:100%;width:auto;max-width:none;object-fit:initial}
+  .card{flex-basis:84%}
 }
 @media(max-width:940px){
-  .two,.three,.plans,.contact,.contact-grid,.grid{grid-template-columns:1fr}
+  .two,.three,.plans,.contact,.contact-grid{grid-template-columns:1fr}
+  .card{flex-basis:calc((100% - clamp(16px,2vw,24px))/2)}
   .foot{justify-content:flex-start}
   nav{display:none}
   nav.open{display:flex;position:absolute;top:68px;left:0;right:0;flex-direction:column;gap:0;background:#000;
@@ -361,7 +386,7 @@ footer{border-top:1px solid var(--line);padding:42px 0 54px;margin-top:20px}
       <a href="#pricing">Pricing</a>
       <a href="#faq">FAQ</a>
     </nav>
-    <a class="btn btn-primary btn-sm" href="#contact" style="margin-left:22px">Start a set</a>
+    <a class="btn btn-primary btn-sm" href="#contact" style="margin-left:22px">Start an order</a>
     <div class="progress" id="prog"></div>
   </div>
 </header>
@@ -390,12 +415,11 @@ footer{border-top:1px solid var(--line);padding:42px 0 54px;margin-top:20px}
     <h1>Better screenshots.<br><span class="grad">More downloads.</span></h1>
     <p class="hero-sub">You built the app. The store page is what sells it — and most indie listings lose the install in the first two frames. I rebuild those frames so a stranger gets what your app does, who it's for and why it's worth the tap, before they scroll past.</p>
     <div class="hero-cta">
-      <a class="btn btn-primary" href="#contact">Start a set — from $65</a>
+      <a class="btn btn-primary" href="#contact">Start an order — from $65</a>
       <a class="btn btn-ghost" href="#work">See the work</a>
     </div>
     <div class="hero-facts">
       <div class="fact"><b data-count="100" data-suffix="+">100+</b><span>screenshots delivered</span></div>
-      <div class="fact"><b data-count="10" data-suffix="+ years">10+ years</b><span>in app and game design</span></div>
       <div class="fact"><b>Unlimited</b><span>revisions on every set</span></div>
       <div class="fact"><b>iOS + Play</b><span>every required size</span></div>
     </div>
@@ -431,7 +455,12 @@ footer{border-top:1px solid var(--line);padding:42px 0 54px;margin-top:20px}
       </div>
       <div class="filters" id="filters"></div>
     </div>
-    <div class="grid" id="grid"></div>
+    <div class="carousel">
+      <button class="car-nav prev" id="gridPrev" aria-label="Previous sets">&#8249;</button>
+      <div class="grid" id="grid"></div>
+      <button class="car-nav next" id="gridNext" aria-label="Next sets">&#8250;</button>
+    </div>
+    <p class="stage-hint" style="text-align:left;margin-top:10px">Slide to see more sets</p>
   </div>
 </section>
 
@@ -526,12 +555,12 @@ footer{border-top:1px solid var(--line);padding:42px 0 54px;margin-top:20px}
     </div>
     <div class="addons">
       <span class="hot">Rush 24h delivery — +$25</span>
-      <span>ASO keyword copy</span>
+      <span>ASO keyword copy — +$20</span>
       <span>Second store</span>
-      <span>Localisation</span>
+      <span>Localisation — +$20 (5-set) / +$40 (10-set)</span>
       <span>App preview video</span>
-      <span>App icon</span>
-      <span>Play feature graphic</span>
+      <span>App icon — +$50</span>
+      <span>Play feature graphic — +$50</span>
       <span>Other graphic work</span>
       <span class="muted" style="border:0;padding-left:4px">Everything else is quoted per app.</span>
     </div>
@@ -613,7 +642,7 @@ footer{border-top:1px solid var(--line);padding:42px 0 54px;margin-top:20px}
             <select id="f-store" name="store"><option>App Store</option><option>Google Play</option><option>Both</option></select>
           </div>
           <div><label for="f-extra">Add-ons</label>
-            <select id="f-extra" name="extra"><option>None</option><option>Rush 24h (+$25)</option><option>ASO keyword copy</option><option>Localisation</option><option>App icon or feature graphic</option></select>
+            <select id="f-extra" name="extra"><option>None</option><option>Rush 24h (+$25)</option><option>ASO keyword copy (+$20)</option><option>Localisation (+$20/+$40)</option><option>App icon (+$50)</option><option>Play feature graphic (+$50)</option></select>
           </div>
         </div>
         <div><label for="f-msg">Anything else</label><textarea id="f-msg" name="msg" placeholder="Launch date, a reference app you like, brand assets, or copy you already have."></textarea></div>
@@ -686,27 +715,25 @@ document.getElementById('filters').addEventListener('click', e=>{
     c.classList.toggle('hide', hide);
     if(!hide && !reduce){ c.animate([{opacity:0,transform:'translateY(10px)'},{opacity:1,transform:'none'}],{duration:340,easing:'cubic-bezier(.2,.7,.2,1)'}); }
   });
+  grid.scrollTo({left:0, behavior:reduce?'auto':'smooth'});
 });
+document.getElementById('gridPrev').onclick=()=>grid.scrollBy({left:-grid.clientWidth*0.9,behavior:'smooth'});
+document.getElementById('gridNext').onclick=()=>grid.scrollBy({left:grid.clientWidth*0.9,behavior:'smooth'});
 
 /* ---- hero showcase ---- */
 const slides=[...document.querySelectorAll('.slide')], tabs=[...document.getElementById('tabs').children];
-const stage=document.getElementById('stage');
-let s=0, timer=null, DUR=5200;
-function goto(n){
-  s=(n+slides.length)%slides.length;
-  slides.forEach((el,i)=>el.classList.toggle('on', i===s));
-  tabs.forEach((d,i)=>d.classList.toggle('on', i===s));
-}
-function play(){ if(reduce) return; clearInterval(timer); timer=setInterval(()=>goto(s+1),DUR); }
-tabs.forEach((d,i)=>d.onclick=()=>{ goto(i); play(); });
-stage.addEventListener('pointerenter',()=>clearInterval(timer));
-stage.addEventListener('pointerleave',()=>play());
-document.getElementById('slides').addEventListener('click',e=>{
-  const f=e.target.closest('.slide.on'); if(!f) return;
+const slidesBox=document.getElementById('slides');
+tabs.forEach((d,i)=>{
+  d.onclick=()=>{
+    tabs.forEach((t,j)=>t.classList.toggle('on', j===i));
+    slides[i].scrollIntoView({behavior:reduce?'auto':'smooth', inline:'center', block:'nearest'});
+  };
+});
+slidesBox.addEventListener('click',e=>{
+  const f=e.target.closest('.slide'); if(!f) return;
   const all=document.querySelector('.chip[data-cat="All"]'); if(all) all.click();
   const card=document.querySelector(`.card[data-i="${f.dataset.i}"]`); if(card) card.click();
 });
-goto(0); play();
 
 /* ---- lightbox ---- */
 const lb=document.getElementById('lb'), lbImg=document.getElementById('lbImg');
