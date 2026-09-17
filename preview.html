@@ -1,0 +1,1368 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Appshot Pro Preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --void:#07080A; --chrome:#0F1116; --panel:#161920; --raise:#1E222B;
+  --raise2:#262B36; --line:#2A2F3A; --line2:#3A4150;
+  --ink:#EDEFF4; --dim:#9AA1B1; --dim2:#6C7385;
+  --gold:#FFC53D; --goldsoft:rgba(255,197,61,.14); --danger:#FF6B5A;
+  --r-s:7px; --r-m:10px; --r-l:14px;
+  --ui:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display",
+       "SF Pro","Inter","Helvetica Neue",system-ui,"Segoe UI",sans-serif;
+  --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,"Roboto Mono",monospace;
+}
+:root[data-theme="light"]{
+  --void:#E8E9ED; --chrome:#FFFFFF; --panel:#FAFAFC; --raise:#F1F2F6;
+  --raise2:#E7E9EF; --line:#E0E2E9; --line2:#CDD1DA;
+  --ink:#15171C; --dim:#5D6472; --dim2:#8A90A0; --goldsoft:rgba(255,197,61,.22);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; background:var(--void); color:var(--ink); font-family:var(--ui);
+  font-size:14px; line-height:1.5; letter-spacing:-.006em;
+  display:flex; flex-direction:column; overflow:hidden;
+  -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+  font-feature-settings:"cv05" 1,"cv08" 1,"ss01" 1;
+}
+button,input,select,textarea{font-family:inherit; font-size:inherit; color:inherit}
+:focus-visible{outline:2px solid var(--gold); outline-offset:2px; border-radius:4px}
+
+/* ---------- header ---------- */
+.top{
+  flex:0 0 66px; display:flex; align-items:center; gap:14px; padding:0 22px;
+  background:var(--chrome); border-bottom:1px solid var(--line); z-index:5;
+}
+.brand{display:flex; align-items:baseline; gap:9px; min-width:0}
+.brand b{white-space:nowrap}
+.brand b{font-size:17px; font-weight:600; letter-spacing:-.022em}
+.brand span{font-size:12.5px; color:var(--dim2); letter-spacing:-.005em;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.grow{flex:1}
+.readout{
+  font-family:var(--mono); font-size:12.5px; color:var(--dim);
+  background:var(--raise); border:1px solid var(--line); border-radius:var(--r-m);
+  padding:9px 14px; white-space:nowrap; letter-spacing:-.01em;
+}
+.readout b{color:var(--ink); font-weight:500}
+.btn{
+  background:var(--raise); border:1px solid var(--line); border-radius:var(--r-m);
+  padding:0 16px; height:38px; min-width:0; cursor:pointer; font-size:13.5px;
+  display:inline-flex; align-items:center; justify-content:center; gap:7px;
+  transition:background .12s,border-color .12s,color .12s; white-space:nowrap;
+}
+.btn.block{width:100%}
+.btn.lg{height:44px; font-size:14.5px; font-weight:600}
+.btn:hover{background:var(--raise2); border-color:var(--line2)}
+.btn.gold{background:var(--gold); border-color:var(--gold); color:#1A1400; font-weight:600}
+.btn.gold:hover{filter:brightness(1.07)}
+.btn.icon{padding:0; width:38px; flex:0 0 38px; font-size:15px}
+
+/* ---------- shell ---------- */
+.shell{flex:1; display:flex; min-height:0}
+.rail{
+  flex:0 0 78px; background:var(--chrome); border-right:1px solid var(--line);
+  display:flex; flex-direction:column; align-items:center; padding:14px 0; gap:8px;
+}
+.rail button{
+  width:62px; padding:12px 0 10px; background:none; border:0; border-radius:var(--r-m);
+  color:var(--dim2); cursor:pointer; display:flex; flex-direction:column;
+  align-items:center; gap:4px; transition:.12s;
+}
+.rail button svg{width:21px; height:21px; stroke:currentColor; fill:none; stroke-width:1.6;
+  stroke-linecap:round; stroke-linejoin:round}
+.rail button span{font-size:10.5px; letter-spacing:.005em; font-weight:500}
+.rail button:hover{color:var(--ink); background:var(--raise)}
+.rail button.on{color:var(--gold); background:var(--goldsoft)}
+
+.inspector{
+  flex:0 0 392px; background:var(--panel); border-right:1px solid var(--line);
+  overflow-y:auto; overscroll-behavior:contain;
+}
+.inspector::-webkit-scrollbar{width:9px}
+.inspector::-webkit-scrollbar-thumb{background:var(--raise2); border-radius:9px; border:3px solid var(--panel)}
+.pane{display:none; padding:26px 22px 64px}
+.pane.on{display:block}
+.pane h2{
+  font-size:17px; font-weight:600; margin:0 0 5px; letter-spacing:-.012em;
+}
+.pane .sub{color:var(--dim2); font-size:13px; margin:0 0 26px; line-height:1.45}
+
+.group{border-top:1px solid var(--line); padding:24px 0 8px; margin-top:14px}
+.group:first-of-type{border-top:0; padding-top:0; margin-top:0}
+.group>h3{
+  font-size:13px; font-weight:600; color:var(--ink); margin:0 0 18px;
+  letter-spacing:-.005em;
+}
+.ctl{display:flex; align-items:center; gap:14px; margin:0 0 18px; min-height:36px}
+.ctl:last-child{margin-bottom:0}
+.ctl>label{flex:0 0 104px; color:var(--dim); font-size:13px; line-height:1.3}
+.ctl.wide{display:block}
+.ctl.wide>label{display:block; margin-bottom:10px}
+
+input[type=range]{
+  -webkit-appearance:none; appearance:none; flex:1; min-width:78px; height:28px;
+  background:transparent; cursor:pointer; margin:0 2px;
+}
+input[type=range]::-webkit-slider-runnable-track{height:4px; background:var(--raise2); border-radius:3px}
+input[type=range]::-moz-range-track{height:4px; background:var(--raise2); border-radius:3px}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none; width:16px; height:16px; border-radius:50%;
+  background:var(--ink); margin-top:-6px; border:0; transition:.1s;
+  box-shadow:0 1px 3px rgba(0,0,0,.4);
+}
+input[type=range]:hover::-webkit-slider-thumb{background:var(--gold)}
+input[type=range]::-moz-range-thumb{width:16px; height:16px; border-radius:50%; background:var(--ink); border:0}
+input[type=range]:disabled{opacity:.35; cursor:default}
+
+.num{
+  width:70px; flex:0 0 70px; height:34px; text-align:right;
+  font-family:var(--mono); font-size:12.5px;
+  background:var(--raise); border:1px solid var(--line); border-radius:var(--r-s);
+  padding:0 10px; letter-spacing:-.02em;
+}
+.num:disabled{opacity:.35}
+input[type=text],textarea,select{
+  width:100%; background:var(--raise); border:1px solid var(--line);
+  border-radius:var(--r-s); padding:0 12px; height:36px; font-size:13.5px;
+}
+textarea{height:auto; padding:10px 12px}
+.ctl:not(.wide)>select,.ctl:not(.wide)>input[type=text]{flex:1; min-width:0; width:auto}
+.ctl.wide>select,.ctl.wide>input[type=text],.ctl.wide>textarea{display:block; width:100%}
+textarea{resize:vertical; min-height:52px; line-height:1.4}
+select{cursor:pointer; appearance:none; background-image:
+  linear-gradient(45deg,transparent 50%,var(--dim) 50%),
+  linear-gradient(135deg,var(--dim) 50%,transparent 50%);
+  background-position:calc(100% - 15px) 16px,calc(100% - 10px) 16px;
+  background-size:6px 6px,6px 6px; background-repeat:no-repeat; padding-right:32px}
+input[type=color]{
+  width:44px; height:34px; flex:0 0 44px; padding:3px; cursor:pointer;
+  background:var(--raise); border:1px solid var(--line); border-radius:var(--r-s);
+}
+.hex{font-family:var(--mono); font-size:12px; color:var(--dim2); width:auto; flex:1;
+  letter-spacing:-.02em}
+
+.seg{display:flex; background:var(--raise); border:1px solid var(--line);
+  border-radius:var(--r-m); padding:4px; gap:4px; flex:1; min-width:0; height:38px}
+.seg button{
+  flex:1; min-width:0; background:none; border:0; border-radius:7px; padding:0 8px;
+  color:var(--dim); cursor:pointer; font-size:12.5px; white-space:nowrap;
+  overflow:hidden; text-overflow:ellipsis;
+}
+.seg button.on{background:var(--raise2); color:var(--ink); font-weight:500}
+.seg button:hover:not(.on){color:var(--ink)}
+
+.switch{
+  flex:0 0 40px; height:23px; border-radius:12px; background:var(--raise2);
+  border:1px solid var(--line); position:relative; cursor:pointer; transition:.14s;
+}
+.switch::after{
+  content:""; position:absolute; top:2px; left:2px; width:17px; height:17px;
+  border-radius:50%; background:var(--dim); transition:.14s;
+}
+.switch.on{background:var(--gold); border-color:var(--gold)}
+.switch.on::after{left:19px; background:#1A1400}
+
+.swatches{display:grid; grid-template-columns:repeat(6,1fr); gap:9px; margin-top:6px}
+.swatches div{
+  aspect-ratio:1; border-radius:8px; border:1px solid var(--line); cursor:pointer;
+}
+.swatches div:hover{border-color:var(--gold)}
+
+.looks{display:grid; grid-template-columns:repeat(2,1fr); gap:12px}
+.look{
+  border:1px solid var(--line); border-radius:var(--r-m); overflow:hidden;
+  cursor:pointer; background:var(--raise); transition:.12s;
+}
+.look:hover{border-color:var(--line2); transform:translateY(-1px)}
+.look.on{border-color:var(--gold)}
+.look i{display:block; height:58px; position:relative}
+.look i::after{
+  content:""; position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+  width:16px; height:28px; border-radius:4px; background:rgba(255,255,255,.9);
+  box-shadow:22px 0 0 rgba(255,255,255,.9),-22px 0 0 rgba(255,255,255,.9);
+}
+.look b{display:block; padding:10px 12px; font-size:12.5px; font-weight:500;
+  border-top:1px solid var(--line)}
+
+/* shots */
+#drop{
+  border:1.5px dashed var(--line2); border-radius:var(--r-l); padding:34px 16px;
+  text-align:center; color:var(--dim2); font-size:12.5px; cursor:pointer; transition:.14s;
+}
+#drop:hover,#drop.hot{border-color:var(--gold); color:var(--gold); background:var(--goldsoft)}
+#drop b{display:block; color:var(--ink); font-size:14.5px; font-weight:600; margin-bottom:6px}
+#drop.hot b{color:var(--gold)}
+#shots{display:flex; flex-wrap:wrap; gap:10px; margin:18px 0 0}
+.sh{
+  position:relative; width:56px; height:100px; border-radius:9px; overflow:hidden;
+  border:2px solid transparent; background:var(--raise); cursor:grab;
+}
+.sh.sel{border-color:var(--gold)}
+.sh.drag{opacity:.3}
+.sh img{width:100%; height:100%; object-fit:cover; display:block; pointer-events:none}
+.sh u{
+  position:absolute; left:0; bottom:0; right:0; background:rgba(0,0,0,.72);
+  font-family:var(--mono); font-size:10px; padding:1px 0; text-align:center; text-decoration:none;
+  color:#fff; pointer-events:none;
+}
+.sh b{
+  position:absolute; right:3px; top:3px; width:18px; height:18px; border-radius:50%;
+  background:rgba(0,0,0,.72); color:#fff; font-size:11px; font-weight:400;
+  line-height:18px; text-align:center; opacity:0; transition:.1s;
+}
+.sh:hover b{opacity:1}
+
+/* stage */
+.main{flex:1; display:flex; flex-direction:column; min-width:0; background:var(--void)}
+.stage{
+  flex:1; overflow:auto; display:grid; place-items:center; padding:44px;
+}
+.stage::-webkit-scrollbar{width:10px; height:10px}
+.stage::-webkit-scrollbar-thumb{background:#22252D; border-radius:10px; border:3px solid var(--void)}
+#view{
+  display:block; box-shadow:0 20px 70px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.05);
+  border-radius:2px;
+}
+#view.alpha{
+  background-image:
+    linear-gradient(45deg,#3A3F49 25%,transparent 25%,transparent 75%,#3A3F49 75%),
+    linear-gradient(45deg,#3A3F49 25%,#2B2F37 25%,#2B2F37 75%,#3A3F49 75%);
+  background-size:18px 18px; background-position:0 0,9px 9px;
+}
+.foot{
+  flex:0 0 50px; display:flex; align-items:center; gap:12px; padding:0 18px;
+  background:var(--chrome); border-top:1px solid var(--line);
+  font-family:var(--mono); font-size:12px; color:var(--dim2);
+}
+.foot .btn{height:32px; padding:0 13px; font-family:var(--ui); font-size:13px}
+.foot select{width:auto; height:32px; padding:0 30px 0 12px; font-size:13px;
+  background-position:calc(100% - 13px) 14px,calc(100% - 8px) 14px}
+.toast{
+  position:fixed; left:50%; bottom:58px; transform:translate(-50%,14px);
+  background:var(--raise2); border:1px solid var(--line2); color:var(--ink);
+  padding:12px 20px; border-radius:var(--r-m); font-size:13.5px; opacity:0;
+  pointer-events:none; transition:.22s; z-index:20;
+  box-shadow:0 10px 34px rgba(0,0,0,.5);
+}
+.toast.on{opacity:1; transform:translate(-50%,0)}
+.note{color:var(--dim2); font-size:12.5px; line-height:1.55; margin:16px 0 0}
+.rowbtns{display:flex; gap:10px; margin-top:16px}
+.stack{display:flex; flex-direction:column; gap:10px; margin-top:16px}
+.rowbtns .btn{flex:1 1 0; min-width:0}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+@media (max-width:920px){
+  .shell{flex-direction:column}
+  .rail{flex:0 0 auto; flex-direction:row; width:100%; border-right:0;
+    border-bottom:1px solid var(--line); overflow-x:auto; padding:6px}
+  .inspector{flex:0 0 auto; max-height:44vh; width:100%; border-right:0;
+    border-bottom:1px solid var(--line)}
+}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <div class="brand"><b>Appshot Pro Preview</b><span>App Store screenshot composer</span></div>
+  <div class="grow"></div>
+  <div class="readout" id="readout">1920 × 1080 · 72 dpi</div>
+  <button class="btn icon" id="themeBtn" title="Toggle light / dark">◐</button>
+  <button class="btn gold lg" id="exportBtn">Export</button>
+</div>
+
+<div class="shell">
+  <nav class="rail" id="rail"></nav>
+  <div class="inspector" id="inspector"></div>
+  <div class="main">
+    <div class="stage" id="stage"><canvas id="view"></canvas></div>
+    <div class="foot">
+      <button class="btn" id="zOut">−</button>
+      <select id="zoomSel">
+        <option value="0" selected>Fit</option>
+        <option value="0.25">25%</option><option value="0.5">50%</option>
+        <option value="0.75">75%</option><option value="1">100%</option>
+        <option value="1.5">150%</option><option value="2">200%</option>
+      </select>
+      <button class="btn" id="zIn">+</button>
+      <span id="zInfo"></span>
+      <div class="grow"></div>
+      <span id="tip">Ctrl + wheel to zoom · drag images anywhere to add</span>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<input type="file" id="filePick" accept="image/*" multiple hidden>
+<input type="file" id="bgPick" accept="image/*" hidden>
+
+<script>
+"use strict";
+const $ = s => document.querySelector(s);
+const MAX = 10;
+
+/* ===================================================================
+   STATE
+   =================================================================== */
+const D = {
+  cw:1920, ch:1080, dpi:72, mult:1, format:"png", quality:92,
+
+  autoTile:true, tileW:420, tileH:910,
+  spacing:18, padding:64, radius:26, fitCanvas:true,
+  halign:"center", valign:"center", imgFit:"fit",
+  tilt:0, tiltMode:"fan", stagger:0, staggerMode:"zigzag", depth:0,
+
+  frame:false, frameW:10, frameColor:"#16181D", frameRadius:34,
+  border:false, borderW:2, borderColor:"#FFFFFF",
+  shadow:true, shadowBlur:44, shadowX:0, shadowY:18, shadowOpacity:38, shadowColor:"#000000",
+  reflect:0,
+
+  bgMode:"solid", bgColor:"#F5F5F7",
+  gradA:"#1B2735", gradB:"#4A6FA5", gradC:"#8FB8DE", gradStops:2, gradAngle:135, gradKind:"linear",
+  bgFit:"cover", bgBlur:0, bgDim:0,
+  grain:0, vignette:0,
+
+};
+let st = {...D};
+let shots = [];       // {img, url, name}
+let sel = -1;
+let bgImg = null;
+let zoom = 0;
+let fontsReady = false;
+
+/* ===================================================================
+   LOOK PRESETS  — one click, sets the whole visual direction
+   =================================================================== */
+const LOOKS = {
+  "Store strip": {bgMode:"solid", bgColor:"#F5F5F7", radius:26, padding:64, spacing:18,
+    shadow:true, shadowBlur:44, shadowY:18, shadowOpacity:38, tilt:0, stagger:0,
+    frame:false, reflect:0, grain:0, vignette:0},
+  "Studio black": {bgMode:"solid", bgColor:"#0B0D11", radius:28, padding:80, spacing:26,
+    shadow:true, shadowBlur:80, shadowY:28, shadowOpacity:70, shadowColor:"#000000",
+    tilt:0, stagger:0, frame:true, frameW:8, frameColor:"#22252C", frameRadius:36,
+    reflect:0, grain:6, vignette:28},
+  "Aurora": {bgMode:"gradient", gradKind:"linear", gradAngle:135, gradStops:3,
+    gradA:"#2B1B5A", gradB:"#7C3AED", gradC:"#22D3EE", radius:30, padding:76, spacing:22,
+    shadow:true, shadowBlur:70, shadowY:24, shadowOpacity:52, tilt:0, stagger:0,
+    grain:8, vignette:18},
+  "Fan deck": {bgMode:"gradient", gradKind:"radial", gradStops:2, gradA:"#F7F4EF",
+    gradB:"#DCD4C6", radius:26, padding:90, spacing:-70, tilt:9, tiltMode:"fan",
+    depth:14, shadow:true, shadowBlur:52, shadowY:20, shadowOpacity:30,
+    stagger:0, grain:5, vignette:12},
+  "Zigzag": {bgMode:"solid", bgColor:"#101216", radius:24, padding:70, spacing:20,
+    stagger:60, staggerMode:"zigzag", tilt:0, shadow:true, shadowBlur:56,
+    shadowY:22, shadowOpacity:60, grain:0, vignette:22},
+  "Sunset": {bgMode:"gradient", gradKind:"linear", gradAngle:160, gradStops:3,
+    gradA:"#FF9A3C", gradB:"#FF5E62", gradC:"#7B2FF7", radius:28, padding:72,
+    spacing:20, shadow:true, shadowBlur:60, shadowY:22, shadowOpacity:40,
+    tilt:0, stagger:0, grain:10, vignette:20},
+  "Reflect": {bgMode:"gradient", gradKind:"linear", gradAngle:180, gradStops:2,
+    gradA:"#11131A", gradB:"#23283A", radius:26, padding:60, spacing:22,
+    reflect:36, shadow:false, tilt:0, stagger:0, grain:4, vignette:26},
+  "Paper": {bgMode:"solid", bgColor:"#EFEAE1", radius:14, padding:70, spacing:16,
+    shadow:true, shadowBlur:26, shadowY:10, shadowOpacity:22, border:true,
+    borderW:3, borderColor:"#FFFFFF", tilt:2, tiltMode:"alternate", stagger:0,
+    grain:16, vignette:10},
+};
+
+const SWATCHES = ["#FFFFFF","#F5F5F7","#E5E5EA","#C7CBD4","#8E8E93","#4A4E57",
+                  "#1C1C1E","#0B0D11","#000000","#0A84FF","#5E5CE6","#30D158",
+                  "#FF9F0A","#FF375F","#DFF5EC","#F3E9DC","#FFE8D6","#E8E3FF"];
+
+const CANVAS_PRESETS = [
+  ["1920 × 1080 — wide", 1920,1080], ["1600 × 900", 1600,900],
+  ["2560 × 1440", 2560,1440], ["3840 × 2160 — 4K", 3840,2160],
+  ["1200 × 630 — OG image", 1200,630], ["1080 × 1080 — square", 1080,1080],
+  ["1080 × 1920 — story", 1080,1920], ["1290 × 2796 — iPhone 6.7\"", 1290,2796],
+  ["1284 × 2778 — iPhone 6.5\"", 1284,2778], ["2064 × 2752 — iPad 13\"", 2064,2752],
+  ["Custom", 0,0],
+];
+
+/* ===================================================================
+   CONTROL BUILDER
+   =================================================================== */
+function el(tag, cls, html){
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (html != null) e.innerHTML = html;
+  return e;
+}
+function ctl(label, node, wide){
+  const w = el("div", "ctl" + (wide ? " wide" : ""));
+  if (label) w.appendChild(el("label", null, label));
+  w.appendChild(node);
+  return w;
+}
+function slider(key, label, min, max, step){
+  const r = el("input"); r.type="range"; r.min=min; r.max=max; r.step=step||1; r.value=st[key];
+  const n = el("input","num"); n.type="number"; n.min=min; n.max=max; n.step=step||1; n.value=st[key];
+  const sync = v => {
+    v = Math.max(min, Math.min(max, +v));
+    if (Number.isNaN(v)) v = D[key];
+    r.value = v; n.value = v; set(key, v);
+  };
+  r.addEventListener("input", () => sync(r.value));
+  n.addEventListener("input", () => sync(n.value));
+  const w = el("div","ctl");
+  w.append(el("label",null,label), r, n);
+  w._set = v => { r.value = v; n.value = v; };
+  w._enable = on => { r.disabled = !on; n.disabled = !on; };
+  reg(key, w);
+  return w;
+}
+function seg(key, label, opts){
+  const s = el("div","seg");
+  opts.forEach(([v,t]) => {
+    const b = el("button", st[key]===v ? "on" : "", t);
+    b.dataset.v = v;
+    b.addEventListener("click", () => {
+      set(key, v);
+      [...s.children].forEach(c => c.classList.toggle("on", c.dataset.v === String(v)));
+    });
+    s.appendChild(b);
+  });
+  const w = ctl(label, s);
+  w._set = v => [...s.children].forEach(c => c.classList.toggle("on", c.dataset.v === String(v)));
+  reg(key, w);
+  return w;
+}
+function toggle(key, label){
+  const t = el("div","switch" + (st[key] ? " on" : ""));
+  t.setAttribute("role","switch"); t.tabIndex = 0;
+  const flip = () => { const v = !st[key]; set(key, v); t.classList.toggle("on", v); };
+  t.addEventListener("click", flip);
+  t.addEventListener("keydown", e => { if (e.key===" "||e.key==="Enter"){ e.preventDefault(); flip(); } });
+  const w = el("div","ctl");
+  w.append(el("label",null,label), t, el("div","grow"));
+  w._set = v => t.classList.toggle("on", !!v);
+  reg(key, w);
+  return w;
+}
+function color(key, label){
+  const c = el("input"); c.type="color"; c.value=st[key];
+  const h = el("span","hex", st[key].toUpperCase());
+  c.addEventListener("input", () => { h.textContent = c.value.toUpperCase(); set(key, c.value); });
+  const w = el("div","ctl");
+  w.append(el("label",null,label), c, h);
+  w._set = v => { c.value = v; h.textContent = String(v).toUpperCase(); };
+  reg(key, w);
+  return w;
+}
+function dropdown(key, label, opts){
+  const s = el("select");
+  opts.forEach(([v,t]) => { const o = el("option",null,t); o.value = v; s.appendChild(o); });
+  s.value = st[key];
+  s.addEventListener("change", () => set(key, isNaN(+s.value) || s.value==="" ? s.value : +s.value));
+  const w = ctl(label, s);
+  w._set = v => { s.value = v; };
+  reg(key, w);
+  return w;
+}
+function textbox(key, label, ph, area){
+  const i = el(area ? "textarea" : "input");
+  if (!area) i.type = "text";
+  i.placeholder = ph || ""; i.value = st[key];
+  i.addEventListener("input", () => set(key, i.value));
+  const w = ctl(label, i, true);
+  w._set = v => { i.value = v; };
+  reg(key, w);
+  return w;
+}
+function group(title, ...nodes){
+  const g = el("div","group");
+  if (title) g.appendChild(el("h3", null, title));
+  nodes.forEach(n => n && g.appendChild(n));
+  return g;
+}
+const REG = {};
+function reg(key, w){ (REG[key] = REG[key] || []).push(w); }
+function syncUI(){
+  for (const k in REG) REG[k].forEach(w => w._set && w._set(st[k]));
+  REG.tileW && REG.tileW.forEach(w => w._enable && w._enable(!st.autoTile));
+  REG.tileH && REG.tileH.forEach(w => w._enable && w._enable(!st.autoTile));
+  REG.quality && REG.quality.forEach(w => w._enable && w._enable(st.format === "jpg"));
+}
+function set(k, v){ st[k] = v; schedule(); if (k==="autoTile"||k==="format") syncUI(); }
+
+/* ===================================================================
+   PANES
+   =================================================================== */
+const TABS = [
+  ["shots","Shots",'<path d="M3 5h18v14H3z"/><path d="M3 15l5-5 4 4 3-3 6 6"/><circle cx="8.5" cy="9" r="1.4"/>'],
+  ["layout","Layout",'<rect x="3" y="4" width="5" height="16" rx="1"/><rect x="9.5" y="4" width="5" height="16" rx="1"/><rect x="16" y="4" width="5" height="16" rx="1"/>'],
+  ["style","Style",'<path d="M12 3l2.6 5.6 6.1.8-4.5 4.2 1.2 6L12 16.8 6.6 19.6l1.2-6L3.3 9.4l6.1-.8z"/>'],
+  ["bg","Backdrop",'<circle cx="12" cy="12" r="9"/><path d="M3 15c3-3 6-3 9 0s6 3 9 0"/>'],
+  ["out","Export",'<path d="M12 4v11"/><path d="M8 11l4 4 4-4"/><path d="M4 20h16"/>'],
+];
+
+function buildRail(){
+  const rail = $("#rail");
+  TABS.forEach(([id, name, path]) => {
+    const b = el("button", id==="shots" ? "on" : "",
+      `<svg viewBox="0 0 24 24">${path}</svg><span>${name}</span>`);
+    b.dataset.tab = id;
+    b.addEventListener("click", () => {
+      document.querySelectorAll("#rail button").forEach(x => x.classList.toggle("on", x===b));
+      document.querySelectorAll(".pane").forEach(p => p.classList.toggle("on", p.dataset.tab===id));
+    });
+    rail.appendChild(b);
+  });
+}
+
+function pane(id, title, sub, ...nodes){
+  const p = el("div","pane" + (id==="shots" ? " on" : ""));
+  p.dataset.tab = id;
+  p.append(el("h2",null,title), el("p","sub",sub));
+  nodes.forEach(n => n && p.appendChild(n));
+  $("#inspector").appendChild(p);
+  return p;
+}
+
+function buildPanes(){
+  /* ---- shots ---- */
+  const drop = el("div", null, "");
+  drop.id = "drop";
+  drop.innerHTML = "<b>Drop screenshots</b>or click to browse · up to 10";
+  const shotsBox = el("div"); shotsBox.id = "shots";
+  const rb = el("div","rowbtns");
+  [["Replace",replaceShot],["Remove",removeShot],["Clear all",clearShots]].forEach(([t,fn]) => {
+    const b = el("button","btn",t);
+    b.addEventListener("click", fn);
+    rb.appendChild(b);
+  });
+  pane("shots","Screenshots","Add up to ten, drag to reorder.",
+    drop, shotsBox, rb,
+    el("p","note","Click a thumbnail to select it. Delete removes the selected one."));
+
+  /* ---- layout ---- */
+  pane("layout","Layout","How the strip is arranged on the canvas.",
+    group("Size",
+      toggle("autoTile","Auto tile size"),
+      slider("tileW","Tile width",40,4000),
+      slider("tileH","Tile height",40,4000),
+      toggle("fitCanvas","Shrink to fit"),
+      dropdown("imgFit","Image",[["fit","Fit — keep aspect"],["fill","Fill — crop"]])),
+    group("Spacing",
+      slider("spacing","Gap",-400,400),
+      slider("padding","Padding",0,600)),
+    group("Alignment",
+      seg("halign","Horizontal",[["left","Left"],["center","Centre"],["right","Right"]]),
+      seg("valign","Vertical",[["top","Top"],["center","Middle"],["bottom","Bottom"]])),
+    group("Arrangement",
+      slider("tilt","Tilt",-30,30),
+      seg("tiltMode","Tilt mode",[["fan","Fan"],["uniform","Uniform"],["alternate","Alternate"]]),
+      slider("stagger","Stagger",0,400),
+      seg("staggerMode","Stagger mode",[["zigzag","Zigzag"],["rise","Rise"],["arc","Arc"]]),
+      slider("depth","Depth falloff",0,40)));
+
+  /* ---- style ---- */
+  const looks = el("div","looks");
+  Object.keys(LOOKS).forEach(name => {
+    const L = LOOKS[name];
+    const d = el("div","look");
+    const swatch = L.bgMode === "gradient"
+      ? `linear-gradient(${(L.gradAngle||135)}deg, ${L.gradA}, ${L.gradC || L.gradB})`
+      : L.bgColor;
+    d.innerHTML = `<i style="background:${swatch}"></i><b>${name}</b>`;
+    d.addEventListener("click", () => {
+      Object.assign(st, L);
+      document.querySelectorAll(".look").forEach(x => x.classList.toggle("on", x===d));
+      syncUI(); schedule(); toast(name + " applied");
+    });
+    looks.appendChild(d);
+  });
+  pane("style","Style","Tile treatment, depth and finish.",
+    group("Looks", looks),
+    group("Tile",
+      slider("radius","Corner radius",0,240),
+      toggle("frame","Device frame"),
+      slider("frameW","Frame width",0,80),
+      color("frameColor","Frame colour"),
+      slider("frameRadius","Frame radius",0,260)),
+    group("Outline",
+      toggle("border","Border"),
+      slider("borderW","Width",0,40),
+      color("borderColor","Colour")),
+    group("Shadow",
+      toggle("shadow","Shadow"),
+      slider("shadowBlur","Blur",0,300),
+      slider("shadowX","Offset X",-200,200),
+      slider("shadowY","Offset Y",-200,200),
+      slider("shadowOpacity","Opacity",0,100),
+      color("shadowColor","Colour")),
+    group("Reflection", slider("reflect","Amount",0,100)));
+
+  /* ---- backdrop ---- */
+  const sw = el("div","swatches");
+  SWATCHES.forEach(c => {
+    const d = el("div"); d.style.background = c; d.title = c;
+    d.addEventListener("click", () => { st.bgColor = c; st.bgMode = "solid"; syncUI(); schedule(); });
+    sw.appendChild(d);
+  });
+  const bgBtns = el("div","rowbtns");
+  const bChoose = el("button","btn","Choose image");
+  bChoose.addEventListener("click", () => $("#bgPick").click());
+  const bClear = el("button","btn","Clear");
+  bClear.addEventListener("click", () => {
+    bgImg = null; if (st.bgMode==="image") st.bgMode = "solid"; syncUI(); schedule();
+  });
+  bgBtns.append(bChoose, bClear);
+
+  pane("bg","Backdrop","What sits behind the strip.",
+    group(null, seg("bgMode","Mode",[["solid","Solid"],["gradient","Gradient"],["image","Image"],["transparent","None"]])),
+    group("Solid", color("bgColor","Colour"), sw),
+    group("Gradient",
+      seg("gradKind","Type",[["linear","Linear"],["radial","Radial"]]),
+      seg("gradStops","Stops",[[2,"Two"],[3,"Three"]]),
+      color("gradA","Start"), color("gradB","Middle"), color("gradC","End"),
+      slider("gradAngle","Angle",0,360)),
+    group("Image",
+      bgBtns,
+      dropdown("bgFit","Fit",[["cover","Cover"],["contain","Contain"],["stretch","Stretch"]]),
+      slider("bgBlur","Blur",0,80),
+      slider("bgDim","Dim",0,100)),
+    group("Finish",
+      slider("grain","Grain",0,60),
+      slider("vignette","Vignette",0,100)));
+
+  /* ---- export ---- */
+  const cp = el("select");
+  CANVAS_PRESETS.forEach(([t,w,h]) => { const o = el("option",null,t); o.value = w+"x"+h; cp.appendChild(o); });
+  cp.value = "1920x1080";
+  cp.addEventListener("change", () => {
+    if (cp.value === "0x0"){ toggleCustom(true); return; }
+    const [w,h] = cp.value.split("x").map(Number);
+    st.cw = w; st.ch = h; toggleCustom(false); syncUI(); schedule();
+  });
+  const cwN = el("input","num"); cwN.type="number"; cwN.value=st.cw; cwN.min=64; cwN.max=16000;
+  const chN = el("input","num"); chN.type="number"; chN.value=st.ch; chN.min=64; chN.max=16000;
+  const swapB = el("button","btn icon","⇄"); swapB.title = "Swap orientation";
+  swapB.addEventListener("click", () => {
+    const w = st.cw; st.cw = st.ch; st.ch = w;
+    cwN.value = st.cw; chN.value = st.ch; cp.value = "0x0"; schedule();
+  });
+  cwN.addEventListener("input", () => { st.cw = +cwN.value || 1920; cp.value="0x0"; schedule(); });
+  chN.addEventListener("input", () => { st.ch = +chN.value || 1080; cp.value="0x0"; schedule(); });
+  function toggleCustom(on){ cwN.disabled = false; chN.disabled = false; }
+  reg("cw", {_set: v => { cwN.value = v; }});
+  reg("ch", {_set: v => { chN.value = v; }});
+  const sizeRow = el("div","ctl");
+  sizeRow.style.gap = "8px";
+  const times = el("span","hex","×");
+  times.style.flex = "0 0 auto"; times.style.textAlign = "center";
+  sizeRow.append(el("label",null,"Pixels"), cwN, times, chN, swapB);
+  const expBtn = el("button","btn gold lg block","Export image");
+  expBtn.addEventListener("click", doExport);
+  const copyBtn = el("button","btn","Copy to clipboard");
+  copyBtn.addEventListener("click", doCopy);
+  const openBtn = el("button","btn","Open in new tab");
+  openBtn.addEventListener("click", openLastInTab);
+  const eb = el("div","stack"); eb.append(expBtn);
+  const eb2 = el("div","rowbtns"); eb2.append(copyBtn, openBtn);
+  const lastExp = el("p","note","No export yet.");
+  lastExp.id = "lastExp";
+
+  const presetSel = el("select");
+  const refreshPresets = keep => {
+    presetSel.innerHTML = "";
+    const o0 = el("option",null,"— saved settings —"); o0.value=""; presetSel.appendChild(o0);
+    Object.keys(loadPresets()).sort().forEach(k => {
+      const o = el("option",null,k); o.value = k; presetSel.appendChild(o);
+    });
+    if (keep) presetSel.value = keep;
+  };
+  presetSel.addEventListener("change", () => {
+    const k = presetSel.value; if (!k) return;
+    const p = loadPresets()[k]; if (!p) return;
+    Object.assign(st, p); syncUI(); schedule(); toast("Loaded " + k);
+  });
+  const pb = el("div","stack");
+  const pSave = el("button","btn block","Save current settings");
+  pSave.addEventListener("click", () => {
+    const n = prompt("Name these settings:"); if (!n) return;
+    const p = loadPresets(); p[n.trim()] = {...st}; storePresets(p);
+    refreshPresets(n.trim()); toast("Saved " + n.trim());
+  });
+  const pDel = el("button","btn","Delete");
+  pDel.addEventListener("click", () => {
+    const k = presetSel.value; if (!k) return;
+    const p = loadPresets(); delete p[k]; storePresets(p); refreshPresets(); toast("Deleted");
+  });
+  const pExp = el("button","btn","Back up to file");
+  pExp.addEventListener("click", () => {
+    const txt = JSON.stringify(loadPresets(), null, 2);
+    deliver(new TextEncoder().encode(txt), "appshot-presets.json", "application/json");
+  });
+  const pb2 = el("div","rowbtns"); pb2.append(pDel, pExp);
+  pb.append(pSave);
+
+  pane("out","Export","Output size is set here, not by the window.",
+    group("Canvas", ctl("Preset", cp), sizeRow),
+    group("File",
+      seg("format","Format",[["png","PNG"],["jpg","JPG"]]),
+      slider("quality","JPG quality",1,100),
+      dropdown("mult","Scale",[[0.5,"0.5×"],[1,"1×"],[2,"2×"],[3,"3×"],[4,"4×"]]),
+      dropdown("dpi","DPI",[[72,"72 — screen"],[144,"144 — retina"],[220,"220"],[300,"300 — print"],[600,"600"]]),
+      el("p","note","DPI is written into the file header (pHYs for PNG, JFIF for JPG). It does not change the pixel count — use Scale for that."),
+      eb, eb2, lastExp),
+    group("Saved settings", ctl(null, presetSel, true), pb, pb2));
+  refreshPresets();
+}
+
+/* ===================================================================
+   RENDER — one path for preview and export
+   =================================================================== */
+const view = $("#view"), vctx = view.getContext("2d", {alpha:true});
+let grainCache = null, grainKey = "";
+
+function rr(ctx,x,y,w,h,r){
+  r = Math.max(0, Math.min(r, Math.min(Math.abs(w),Math.abs(h))/2));
+  ctx.beginPath();
+  if (ctx.roundRect) ctx.roundRect(x,y,w,h,r);
+  else{
+    ctx.moveTo(x+r,y);
+    ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r);
+    ctx.arcTo(x,y+h,x,y,r);     ctx.arcTo(x,y,x+w,y,r);
+    ctx.closePath();
+  }
+}
+function fitBox(iw,ih,w,h,mode){
+  const s = mode === "contain" ? Math.min(w/iw,h/ih)
+          : mode === "stretch" ? null : Math.max(w/iw,h/ih);
+  if (s === null) return [0,0,w,h];
+  const dw = iw*s, dh = ih*s;
+  return [(w-dw)/2,(h-dh)/2,dw,dh];
+}
+function gradient(ctx,s,w,h){
+  let g;
+  if (s.gradKind === "radial"){
+    g = ctx.createRadialGradient(w/2,h/2,Math.min(w,h)*0.05,w/2,h/2,Math.max(w,h)*0.75);
+  } else {
+    const a = (s.gradAngle-90)*Math.PI/180;
+    const r = Math.max(w,h);
+    g = ctx.createLinearGradient(w/2-Math.cos(a)*r/2, h/2-Math.sin(a)*r/2,
+                                 w/2+Math.cos(a)*r/2, h/2+Math.sin(a)*r/2);
+  }
+  g.addColorStop(0, s.gradA);
+  if (+s.gradStops === 3){ g.addColorStop(0.5, s.gradB); g.addColorStop(1, s.gradC); }
+  else g.addColorStop(1, s.gradB);
+  return g;
+}
+function grainTile(size, amount){
+  const key = size + ":" + amount;
+  if (grainCache && grainKey === key) return grainCache;
+  const c = document.createElement("canvas");
+  c.width = c.height = size;
+  const x = c.getContext("2d");
+  const d = x.createImageData(size,size);
+  for (let i=0; i<d.data.length; i+=4){
+    const v = 128 + (Math.random()-0.5)*255;
+    d.data[i] = d.data[i+1] = d.data[i+2] = v;
+    d.data[i+3] = 255;
+  }
+  x.putImageData(d,0,0);
+  grainCache = c; grainKey = key;
+  return c;
+}
+
+function tileTransforms(s, n, tw, th, sp, x0, y0){
+  const out = [];
+  const mid = (n-1)/2;
+  for (let i=0; i<n; i++){
+    const t = mid === 0 ? 0 : (i-mid)/mid;       // -1 … 1
+    let rot = 0;
+    if (s.tilt){
+      rot = s.tiltMode === "fan"       ? s.tilt * t
+          : s.tiltMode === "alternate" ? s.tilt * (i%2 ? -1 : 1)
+          :                              s.tilt;
+    }
+    let dy = 0;
+    if (s.stagger){
+      dy = s.staggerMode === "zigzag" ? (i%2 ? s.stagger/2 : -s.stagger/2)
+         : s.staggerMode === "rise"   ? -s.stagger * (i/Math.max(1,n-1) - 0.5)
+         :                              s.stagger * (t*t - 0.33);   // arc
+    }
+    const sc = s.depth ? 1 - (s.depth/100) * Math.abs(t) : 1;
+    out.push({
+      cx: x0 + i*(tw+sp) + tw/2,
+      cy: y0 + th/2 + dy,
+      rot: rot*Math.PI/180, sc, w:tw, h:th, i
+    });
+  }
+  return out;
+}
+
+function drawTileShape(ctx, T, s, k, cb){
+  ctx.save();
+  ctx.translate(T.cx, T.cy);
+  ctx.rotate(T.rot);
+  ctx.scale(T.sc, T.sc);
+  cb(ctx, -T.w/2, -T.h/2, T.w, T.h);
+  ctx.restore();
+}
+
+function render(ctx, s, scale, flatten){
+  const W = Math.round(s.cw*scale), H = Math.round(s.ch*scale);
+  ctx.setTransform(1,0,0,1,0,0);
+  ctx.clearRect(0,0,W,H);
+  ctx.setTransform(scale,0,0,scale,0,0);
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = "high";
+  const w = s.cw, h = s.ch;
+
+  /* backdrop ------------------------------------------------------- */
+  if (flatten){ ctx.fillStyle = flatten; ctx.fillRect(0,0,w,h); }
+  if (s.bgMode === "solid"){ ctx.fillStyle = s.bgColor; ctx.fillRect(0,0,w,h); }
+  else if (s.bgMode === "gradient"){ ctx.fillStyle = gradient(ctx,s,w,h); ctx.fillRect(0,0,w,h); }
+  else if (s.bgMode === "image" && bgImg){
+    ctx.save();
+    if (s.bgBlur) ctx.filter = `blur(${s.bgBlur*scale}px)`;
+    const pad = s.bgBlur ? s.bgBlur*2.5 : 0;
+    const [ox,oy,dw,dh] = fitBox(bgImg.width,bgImg.height,w+pad*2,h+pad*2,s.bgFit);
+    ctx.drawImage(bgImg, ox-pad, oy-pad, dw, dh);
+    ctx.restore();
+    if (s.bgDim){ ctx.fillStyle = `rgba(0,0,0,${s.bgDim/100})`; ctx.fillRect(0,0,w,h); }
+  }
+
+  const n = shots.length;
+
+  /* geometry ------------------------------------------------------- */
+  let boxes = [], tw = 0, th = 0, k = 1, y0 = 0, x0 = 0, sp = s.spacing;
+  const pd = s.padding;
+  const CW = Math.max(1, w - pd*2);
+  let CH = Math.max(1, h - pd*2);
+
+
+  if (n){
+    if (s.autoTile){ th = CH; tw = th * (shots[0].img.width/shots[0].img.height); }
+    else { tw = s.tileW; th = s.tileH; }
+    let total = n*tw + (n-1)*sp;
+    if (s.fitCanvas){
+      if (total > CW && total > 0) k = CW/total;
+      if (th*k > CH) k = Math.min(k, CH/th);
+    }
+    tw *= k; th *= k; sp *= k; total = n*tw + (n-1)*sp;
+    x0 = s.halign === "left"  ? pd
+       : s.halign === "right" ? pd + CW - total
+       : pd + (CW-total)/2;
+    y0 = s.valign === "top"    ? pd
+       : s.valign === "bottom" ? pd + CH - th
+       : pd + (CH-th)/2;
+    boxes = tileTransforms(s, n, tw, th, sp, x0, y0);
+  }
+
+  const rad = s.radius*k;
+  const frameW = s.frame ? s.frameW*k : 0;
+  const frameRad = s.frameRadius*k;
+
+  /* shadows — single composited layer so overlaps stay clean -------- */
+  if (n && s.shadow && s.shadowOpacity > 0){
+    const lay = document.createElement("canvas");
+    lay.width = W; lay.height = H;
+    if (W*H > 90e6) { lay.width = 1; lay.height = 1; }
+    const lc = lay.getContext("2d");
+    lc.setTransform(scale,0,0,scale,0,0);
+    lc.shadowColor = s.shadowColor;
+    lc.shadowBlur = s.shadowBlur*scale*k;
+    lc.shadowOffsetX = s.shadowX*scale*k;
+    lc.shadowOffsetY = s.shadowY*scale*k;
+    lc.fillStyle = s.shadowColor;
+    boxes.forEach(T => drawTileShape(lc, T, s, k, (c,x,y,bw,bh) => {
+      rr(c, x-frameW, y-frameW, bw+frameW*2, bh+frameW*2, frameW ? frameRad : rad);
+      c.fill();
+    }));
+    ctx.save();
+    ctx.setTransform(1,0,0,1,0,0);
+    ctx.globalAlpha = s.shadowOpacity/100;
+    ctx.drawImage(lay,0,0);
+    ctx.restore();
+    ctx.setTransform(scale,0,0,scale,0,0);
+  }
+
+  /* tiles ---------------------------------------------------------- */
+  boxes.forEach(T => {
+    const img = shots[T.i].img;
+    drawTileShape(ctx, T, s, k, (c,x,y,bw,bh) => {
+      if (frameW){
+        c.fillStyle = s.frameColor;
+        rr(c, x-frameW, y-frameW, bw+frameW*2, bh+frameW*2, frameRad);
+        c.fill();
+      }
+      const a = img.width/img.height;
+      let dx=x, dy=y, dw=bw, dh=bh;
+      if (s.imgFit === "fit"){
+        if (bw/bh > a){ dh = bh; dw = dh*a; } else { dw = bw; dh = dw/a; }
+        dx = x + (bw-dw)/2; dy = y + (bh-dh)/2;
+      }
+      c.save();
+      rr(c, dx, dy, dw, dh, rad);
+      c.clip();
+      if (s.imgFit === "fill"){
+        const [ox,oy,fw,fh] = fitBox(img.width,img.height,bw,bh,"cover");
+        c.drawImage(img, x+ox, y+oy, fw, fh);
+      } else c.drawImage(img, dx, dy, dw, dh);
+      c.restore();
+
+      if (s.border && s.borderW > 0){
+        c.strokeStyle = s.borderColor;
+        c.lineWidth = Math.max(0.4, s.borderW*k);
+        rr(c, dx, dy, dw, dh, rad);
+        c.stroke();
+      }
+
+      if (s.reflect > 0){
+        const rh = bh * (s.reflect/100);
+        c.save();
+        c.translate(0, y+bh);
+        c.scale(1,-1);
+        c.beginPath(); c.rect(x, 0, bw, rh); c.clip();
+        c.globalAlpha = 0.5;
+        const [ox,oy,fw,fh] = s.imgFit === "fill"
+          ? fitBox(img.width,img.height,bw,bh,"cover") : [dx-x, dy-y, dw, dh];
+        c.drawImage(img, x+ox, oy, fw, fh);
+        c.globalAlpha = 1;
+        const g = c.createLinearGradient(0,0,0,rh);
+        g.addColorStop(0,"rgba(0,0,0,0.55)");
+        g.addColorStop(1,"rgba(0,0,0,1)");
+        c.globalCompositeOperation = "destination-out";
+        c.fillStyle = g; c.fillRect(x,0,bw,rh);
+        c.restore();
+      }
+    });
+  });
+
+  /* finish --------------------------------------------------------- */
+  if (s.vignette > 0){
+    const g = ctx.createRadialGradient(w/2,h/2,Math.min(w,h)*0.25,w/2,h/2,Math.max(w,h)*0.72);
+    g.addColorStop(0,"rgba(0,0,0,0)");
+    g.addColorStop(1,`rgba(0,0,0,${s.vignette/100})`);
+    ctx.fillStyle = g; ctx.fillRect(0,0,w,h);
+  }
+  if (s.grain > 0){
+    const t = grainTile(160, s.grain);
+    ctx.save();
+    ctx.globalAlpha = s.grain/100;
+    ctx.globalCompositeOperation = "overlay";
+    const p = ctx.createPattern(t,"repeat");
+    ctx.fillStyle = p; ctx.fillRect(0,0,w,h);
+    ctx.restore();
+  }
+}
+
+/* ===================================================================
+   PREVIEW
+   =================================================================== */
+let raf = null;
+function schedule(){ if (raf) return; raf = requestAnimationFrame(() => { raf = null; paint(); }); }
+function fitScale(){
+  const s = $("#stage");
+  return Math.max(0.02, Math.min((s.clientWidth-60)/st.cw, (s.clientHeight-60)/st.ch));
+}
+function paint(){
+  let scale = zoom === 0 ? fitScale() : zoom;
+  while (st.cw*scale > 6200 || st.ch*scale > 6200) scale *= 0.75;
+  view.width = Math.round(st.cw*scale);
+  view.height = Math.round(st.ch*scale);
+  view.classList.toggle("alpha", st.bgMode === "transparent");
+  render(vctx, st, scale, null);
+  $("#zInfo").textContent = Math.round(scale*100) + "%";
+  const m = exportScale();
+  $("#readout").innerHTML =
+    `<b>${Math.round(st.cw*m)} × ${Math.round(st.ch*m)}</b> · ${st.dpi} dpi · ${st.format.toUpperCase()}`;
+}
+window.addEventListener("resize", () => { if (zoom === 0) schedule(); });
+
+/* ===================================================================
+   SHOTS
+   =================================================================== */
+function addFiles(files){
+  const room = MAX - shots.length;
+  if (room <= 0){ toast("Ten is the limit"); return; }
+  [...files].filter(f => f.type.startsWith("image/")).slice(0,room).forEach(f => {
+    const url = URL.createObjectURL(f);
+    const img = new Image();
+    img.onload = () => { shots.push({img,url,name:f.name,}); drawShots(); schedule(); };
+    img.onerror = () => toast("Could not read " + f.name);
+    img.src = url;
+  });
+}
+function drawShots(){
+  const box = $("#shots");
+  box.innerHTML = "";
+  shots.forEach((s,i) => {
+    const d = el("div","sh" + (i===sel ? " sel" : ""));
+    d.draggable = true;
+    d.innerHTML = `<img src="${s.url}" alt=""><u>${i+1}</u><b>×</b>`;
+    d.addEventListener("click", e => {
+      if (e.target.tagName === "B"){
+        URL.revokeObjectURL(s.url);
+        shots.splice(i,1);
+        if (sel >= shots.length) sel = shots.length-1;
+        drawShots(); schedule(); return;
+      }
+      sel = i; drawShots();
+    });
+    d.addEventListener("dragstart", e => {
+      e.dataTransfer.setData("text/plain", String(i));
+      e.dataTransfer.effectAllowed = "move";
+      d.classList.add("drag");
+    });
+    d.addEventListener("dragend", () => d.classList.remove("drag"));
+    d.addEventListener("dragover", e => { e.preventDefault(); e.dataTransfer.dropEffect="move"; });
+    d.addEventListener("drop", e => {
+      e.preventDefault(); e.stopPropagation();
+      const from = +e.dataTransfer.getData("text/plain");
+      if (Number.isNaN(from) || from === i) return;
+      const [m] = shots.splice(from,1);
+      shots.splice(i,0,m);
+      sel = i; drawShots(); schedule();
+    });
+    box.appendChild(d);
+  });
+}
+function removeShot(){
+  if (sel < 0 || !shots[sel]) return;
+  shots.splice(sel,1); sel = Math.min(sel, shots.length-1); drawShots(); schedule();
+}
+function clearShots(){ shots = []; sel = -1; drawShots(); schedule(); }
+function replaceShot(){
+  if (sel < 0){ toast("Select a screenshot first"); return; }
+  const i = el("input"); i.type="file"; i.accept="image/*";
+  i.onchange = () => {
+    const f = i.files[0]; if (!f) return;
+    const url = URL.createObjectURL(f);
+    const img = new Image();
+    img.onload = () => { shots[sel] = {img,url,name:f.name};
+      drawShots(); schedule(); };
+    img.src = url;
+  };
+  i.click();
+}
+
+/* ===================================================================
+   DPI METADATA
+   =================================================================== */
+const CRC_T = (() => {
+  const t = new Uint32Array(256);
+  for (let n=0; n<256; n++){
+    let c = n;
+    for (let k=0; k<8; k++) c = (c & 1) ? (0xEDB88320 ^ (c>>>1)) : (c>>>1);
+    t[n] = c >>> 0;
+  }
+  return t;
+})();
+function crc32(bytes){
+  let c = 0xFFFFFFFF;
+  for (let i=0; i<bytes.length; i++) c = CRC_T[(c ^ bytes[i]) & 0xFF] ^ (c >>> 8);
+  return (c ^ 0xFFFFFFFF) >>> 0;
+}
+function pngWithDpi(buf, dpi){
+  const src = new Uint8Array(buf);
+  if (src[0] !== 0x89 || src[1] !== 0x50) return src;
+  const ppm = Math.round(dpi / 0.0254);
+  const chunk = new Uint8Array(21);
+  const dv = new DataView(chunk.buffer);
+  dv.setUint32(0, 9);
+  chunk.set([0x70,0x48,0x59,0x73], 4);      // "pHYs"
+  dv.setUint32(8, ppm); dv.setUint32(12, ppm);
+  chunk[16] = 1;                             // unit = metre
+  dv.setUint32(17, crc32(chunk.subarray(4,17)));
+
+  // walk chunks, drop any existing pHYs, insert ours right after IHDR
+  const out = [src.subarray(0,8)];
+  let p = 8, wrote = false;
+  while (p < src.length){
+    const len = new DataView(src.buffer, src.byteOffset+p, 4).getUint32(0);
+    const type = String.fromCharCode(src[p+4],src[p+5],src[p+6],src[p+7]);
+    const end = p + 12 + len;
+    if (type !== "pHYs") out.push(src.subarray(p, end));
+    if (type === "IHDR" && !wrote){ out.push(chunk); wrote = true; }
+    p = end;
+    if (type === "IEND") break;
+  }
+  let size = 0; out.forEach(a => size += a.length);
+  const merged = new Uint8Array(size);
+  let o = 0; out.forEach(a => { merged.set(a,o); o += a.length; });
+  return merged;
+}
+function jpgWithDpi(buf, dpi){
+  const b = new Uint8Array(buf);
+  for (let i=2; i<b.length-12; i++){
+    if (b[i]===0xFF && b[i+1]===0xE0 &&
+        b[i+4]===0x4A && b[i+5]===0x46 && b[i+6]===0x49 && b[i+7]===0x46){
+      b[i+11] = 1;                      // units = dots per inch
+      b[i+12] = (dpi>>8)&0xFF; b[i+13] = dpi&0xFF;
+      b[i+14] = (dpi>>8)&0xFF; b[i+15] = dpi&0xFF;
+      break;
+    }
+  }
+  return b;
+}
+
+/* ===================================================================
+   EXPORT
+   =================================================================== */
+const MAX_DIM = 16000, MAX_AREA = 60e6;
+function exportScale(){
+  let m = +st.mult;
+  const fit = Math.min(MAX_DIM/st.cw, MAX_DIM/st.ch, Math.sqrt(MAX_AREA/(st.cw*st.ch)));
+  if (m > fit){ m = Math.max(0.25, Math.floor(fit*100)/100); }
+  return m;
+}
+let exportPath = "";
+
+// Is every sampled pixel identical? Then nothing was painted.
+function looksBlank(ctx, w, h){
+  try{
+    const pts = [[2,2],[w>>1,h>>1],[w-3,h-3],[w>>2,h>>1],[w-(w>>2),h>>2],[w>>1,h>>2]];
+    const ref = ctx.getImageData(pts[0][0], pts[0][1], 1, 1).data.join(",");
+    for (let i=1; i<pts.length; i++){
+      if (ctx.getImageData(pts[i][0], pts[i][1], 1, 1).data.join(",") !== ref) return false;
+    }
+    return true;
+  }catch(e){ return false; }   // can't read it — assume it's fine
+}
+
+function buildCanvas(){
+  const m = exportScale();
+  const jpg = st.format === "jpg";
+  const W = Math.round(st.cw*m), H = Math.round(st.ch*m);
+  // JPG carries no alpha; flatten a transparent backdrop onto white so the
+  // file matches the preview instead of going black.
+  const flatten = jpg ? (st.bgMode === "transparent" ? "#FFFFFF" : null) : null;
+
+  // 1) ordinary offscreen canvas — always with an alpha channel, so a canvas
+  //    that somehow goes unpainted comes out empty rather than opaque black
+  const c = document.createElement("canvas");
+  c.width = W; c.height = H;
+  const ctx = c.getContext("2d");
+  if (ctx){
+    render(ctx, st, m, flatten);
+    if (!shots.length || !looksBlank(ctx, W, H)){ exportPath = "offscreen"; return c; }
+  }
+
+  // 2) the offscreen canvas came back empty. Paint through the preview canvas
+  //    instead — that one is demonstrably rendering on this machine — then
+  //    copy the pixels out and put the preview back.
+  exportPath = "via preview";
+  const keepW = view.width, keepH = view.height;
+  try{
+    view.width = W; view.height = H;
+    render(vctx, st, m, flatten);
+    const c2 = document.createElement("canvas");
+    c2.width = W; c2.height = H;
+    c2.getContext("2d").drawImage(view, 0, 0);
+    return c2;
+  }catch(e){
+    exportPath = "offscreen (fallback failed)";
+    return c;
+  }finally{
+    view.width = keepW; view.height = keepH;
+    schedule();
+  }
+}
+function fmtBytes(n){
+  return n < 1024 ? n + " B"
+       : n < 1048576 ? (n/1024).toFixed(0) + " KB"
+       : (n/1048576).toFixed(2) + " MB";
+}
+function looksLikePng(b){
+  return b.length > 100 && b[0]===0x89 && b[1]===0x50 && b[2]===0x4E && b[3]===0x47;
+}
+function looksLikeJpg(b){
+  return b.length > 100 && b[0]===0xFF && b[1]===0xD8 && b[b.length-2]===0xFF && b[b.length-1]===0xD9;
+}
+function canvasBytes(c, jpg, quality){
+  // toBlob first; toDataURL is the fallback when a host returns null
+  return new Promise(resolve => {
+    let done = false;
+    const finish = u8 => { if (!done){ done = true; resolve(u8); } };
+    const viaDataUrl = () => {
+      try{
+        const u = c.toDataURL(jpg ? "image/jpeg" : "image/png", jpg ? quality : undefined);
+        const bin = atob(u.slice(u.indexOf(",")+1));
+        const a = new Uint8Array(bin.length);
+        for (let i=0; i<bin.length; i++) a[i] = bin.charCodeAt(i);
+        finish(a);
+      }catch(e){ finish(null); }
+    };
+    try{
+      c.toBlob(b => {
+        if (!b || !b.size) return viaDataUrl();
+        b.arrayBuffer().then(ab => finish(new Uint8Array(ab))).catch(viaDataUrl);
+      }, jpg ? "image/jpeg" : "image/png", jpg ? quality : undefined);
+    }catch(e){ viaDataUrl(); }
+    setTimeout(() => { if (!done) viaDataUrl(); }, 12000);
+  });
+}
+let lastBytes = null, lastName = "";
+async function doExport(){
+  if (!shots.length){ toast("Add a screenshot first"); return; }
+  const jpg = st.format === "jpg";
+  const c = buildCanvas();
+  if (exportScale() < +st.mult)
+    toast("Scaled to " + c.width + " × " + c.height + " — larger exceeds the browser limit");
+
+  let bytes = await canvasBytes(c, jpg, st.quality/100);
+  if (!bytes || !bytes.length){ toast("The browser returned no image data"); return; }
+
+  // stamp the DPI, but never let that step cost us a working file
+  try{
+    const stamped = jpg ? jpgWithDpi(bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset+bytes.length), st.dpi)
+                        : pngWithDpi(bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset+bytes.length), st.dpi);
+    if (stamped && stamped.length && (jpg ? looksLikeJpg(stamped) : looksLikePng(stamped))) bytes = stamped;
+  }catch(e){ /* keep the unstamped bytes */ }
+
+  lastBytes = bytes;
+  lastName = "appshot-preview." + (jpg ? "jpg" : "png");
+  updateLastExport(c.width, c.height, bytes.length);
+  await deliver(bytes, lastName, jpg ? "image/jpeg" : "image/png");
+}
+
+async function deliver(bytes, filename, mime){
+  // 1) the host's own save dialog, when this page is running inside Claude
+  try{
+    if (window.claude && typeof window.claude.use === "function"){
+      const dl = await window.claude.use("downloads");
+      if (dl){
+        try{
+          await dl.save({filename, data: bytes});   // a view is copied, never detached
+          toast("Saved " + filename + " · " + fmtBytes(bytes.length));
+          return;
+        }catch(err){
+          if (err && err.code === "declined") return;      // they said no; do nothing
+          toast("Save failed (" + ((err && err.code) || "error") + ") — trying the browser");
+        }
+      }
+    }
+  }catch(_){}
+
+  // 2) ordinary browser download
+  const blob = new Blob([bytes], {type: mime});
+  try{
+    const url = URL.createObjectURL(blob);
+    const a = el("a"); a.href = url; a.download = filename;
+    a.rel = "noopener";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 15000);
+    toast("Saved " + filename + " · " + fmtBytes(bytes.length));
+  }catch(e){
+    toast("Download blocked — use Open image instead");
+  }
+}
+
+function openLastInTab(){
+  if (!lastBytes){ toast("Export once first"); return; }
+  const jpg = lastName.endsWith(".jpg");
+  const blob = new Blob([lastBytes], {type: jpg ? "image/jpeg" : "image/png"});
+  const url = URL.createObjectURL(blob);
+  const w = window.open(url, "_blank");
+  if (!w) toast("Pop-up blocked — allow pop-ups for this page");
+  setTimeout(() => URL.revokeObjectURL(url), 60000);
+}
+
+function updateLastExport(w, h, n){
+  const e = document.getElementById("lastExp");
+  if (e) e.textContent = "Last build: " + w + " × " + h + " · " + fmtBytes(n)
+      + " · " + st.dpi + " dpi · " + exportPath;
+}
+async function doCopy(){
+  if (!shots.length) return;
+  try{
+    const bytes = await canvasBytes(buildCanvas(), false, 1);
+    if (!bytes) { toast("Could not build the image"); return; }
+    const blob = new Blob([bytes], {type:"image/png"});
+    await navigator.clipboard.write([new ClipboardItem({"image/png": blob})]);
+    toast("Copied to clipboard");
+  }catch(e){ toast("Clipboard blocked — use Export"); }
+}
+
+/* ===================================================================
+   PRESET STORAGE
+   =================================================================== */
+const KEY = "appshot.presets.v1";
+function loadPresets(){ try{ return JSON.parse(localStorage.getItem(KEY) || "{}"); }catch(_){ return {}; } }
+function storePresets(p){ try{ localStorage.setItem(KEY, JSON.stringify(p)); }catch(_){ toast("Browser storage unavailable"); } }
+
+/* ===================================================================
+   MISC UI
+   =================================================================== */
+let toastT = null;
+function toast(msg){
+  const t = $("#toast");
+  t.textContent = msg; t.classList.add("on");
+  clearTimeout(toastT);
+  toastT = setTimeout(() => t.classList.remove("on"), 1900);
+}
+function stepZoom(f){
+  const cur = zoom === 0 ? fitScale() : zoom;
+  zoom = Math.max(0.05, Math.min(4, cur*f));
+  $("#zoomSel").value = "";
+  schedule();
+}
+
+function wire(){
+  $("#exportBtn").addEventListener("click", doExport);
+  $("#zIn").addEventListener("click", () => stepZoom(1.25));
+  $("#zOut").addEventListener("click", () => stepZoom(0.8));
+  $("#zoomSel").addEventListener("change", e => { zoom = +e.target.value; schedule(); });
+  $("#stage").addEventListener("wheel", e => {
+    if (!e.ctrlKey) return;
+    e.preventDefault();
+    stepZoom(e.deltaY < 0 ? 1.1 : 1/1.1);
+  }, {passive:false});
+
+  $("#themeBtn").addEventListener("click", () => {
+    const r = document.documentElement;
+    r.dataset.theme = r.dataset.theme === "light" ? "dark" : "light";
+  });
+
+  $("#filePick").addEventListener("change", e => { addFiles(e.target.files); e.target.value=""; });
+  $("#bgPick").addEventListener("change", e => {
+    const f = e.target.files[0]; if (!f) return;
+    const img = new Image();
+    img.onload = () => { bgImg = img; st.bgMode = "image"; syncUI(); schedule(); };
+    img.src = URL.createObjectURL(f);
+    e.target.value = "";
+  });
+  const drop = $("#drop");
+  drop.addEventListener("click", () => $("#filePick").click());
+  ["dragenter","dragover"].forEach(ev => document.addEventListener(ev, e => {
+    e.preventDefault(); drop.classList.add("hot");
+  }));
+  ["dragleave","drop"].forEach(ev => document.addEventListener(ev, e => {
+    if (ev === "drop") e.preventDefault();
+    drop.classList.remove("hot");
+  }));
+  document.addEventListener("drop", e => {
+    if (e.dataTransfer && e.dataTransfer.files.length) addFiles(e.dataTransfer.files);
+  });
+
+  document.addEventListener("keydown", e => {
+    const typing = /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName);
+    if ((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==="e"){ e.preventDefault(); doExport(); }
+    if ((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==="o"){ e.preventDefault(); $("#filePick").click(); }
+    if (typing) return;
+    if (e.key === "Delete" || e.key === "Backspace"){ removeShot(); }
+    if (e.key === "0"){ zoom = 0; $("#zoomSel").value = "0"; schedule(); }
+  });
+}
+
+buildRail();
+buildPanes();
+wire();
+syncUI();
+schedule();
+
+if (document.fonts && document.fonts.ready){
+  document.fonts.ready.then(() => { fontsReady = true; schedule(); });
+}
+</script>
+</body>
+</html>
